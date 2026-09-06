@@ -15,8 +15,10 @@ from __future__ import annotations
 import logging
 import multiprocessing as mp
 import os
+import sys
 from abc import ABC, abstractmethod
 from concurrent.futures import Future, ProcessPoolExecutor, ThreadPoolExecutor
+from contextlib import redirect_stdout
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +31,10 @@ def _run_backtest_in_process(market_df, expression, n_groups, holding_period, **
     from quantgpt.backtest import disable_api_context, enable_api_context, run_factor_backtest
     enable_api_context()
     try:
-        return run_factor_backtest(market_df, expression, n_groups, holding_period, **kwargs)
+        # A spawned worker inherits the MCP stdout pipe on Windows.  Prevent
+        # third-party print() calls from corrupting the parent's JSON-RPC stream.
+        with redirect_stdout(sys.stderr):
+            return run_factor_backtest(market_df, expression, n_groups, holding_period, **kwargs)
     finally:
         disable_api_context()
 
@@ -38,10 +43,11 @@ def _run_backtest_precomputed_in_process(market_df, n_groups, holding_period, co
     from quantgpt.backtest import disable_api_context, enable_api_context, run_factor_backtest
     enable_api_context()
     try:
-        return run_factor_backtest(
-            market_df, n_groups=n_groups, holding_period=holding_period,
-            cost_rate=cost_rate, precomputed_factor=precomputed_factor,
-        )
+        with redirect_stdout(sys.stderr):
+            return run_factor_backtest(
+                market_df, n_groups=n_groups, holding_period=holding_period,
+                cost_rate=cost_rate, precomputed_factor=precomputed_factor,
+            )
     finally:
         disable_api_context()
 

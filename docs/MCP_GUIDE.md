@@ -2,6 +2,58 @@
 
 QuantGPT 提供标准 MCP (Model Context Protocol) 接口，支持 10 个因子研究工具。可通过 Claude Code、Claude Desktop 等 MCP 客户端直接调用。
 
+## OpenAI Codex CLI（Windows，推荐 Streamable HTTP）
+
+Codex 支持 stdio 和 Streamable HTTP。QuantGPT 的行情依赖（尤其 baostock）会输出普通文本，
+因此 Codex 推荐使用独立的 HTTP 入口，将协议流与进程 stdout 完全隔离：
+
+```powershell
+# 在 QuantGPT 项目根目录运行；请替换为安装了本项目依赖的 Python 绝对路径
+C:\path\to\python.exe -m quantgpt.codex_mcp_server --host 127.0.0.1 --port 8003
+
+# 另开 PowerShell 注册并检查服务
+codex.cmd mcp add quantgpt --url http://127.0.0.1:8003/mcp
+codex.cmd mcp list
+codex.cmd mcp get quantgpt
+```
+
+长回测需要在 `%USERPROFILE%\.codex\config.toml`（或可信项目的 `.codex\config.toml`）中设置工具超时：
+
+```toml
+[mcp_servers.quantgpt]
+url = "http://127.0.0.1:8003/mcp"
+startup_timeout_sec = 30
+tool_timeout_sec = 600
+```
+
+最小验证调用：
+
+```powershell
+C:\path\to\python.exe scripts\test_codex_mcp.py --transport http --timeout 600
+```
+
+或在 Codex 中发起同样的工具调用：
+
+```text
+调用 quantgpt 的 score_factor：
+expression="rank(close / ts_shift(close, 20) - 1)",
+universe="small_scale",
+start_date="2024-01-01",
+end_date="2025-12-31"
+```
+
+也可继续用 stdio。QuantGPT 的 stdio compatibility layer 会保留原始 stdout 给 JSON-RPC，
+并把 baostock 的 `login success!` / `logout success!` 等普通输出转到 stderr：
+
+```powershell
+codex.cmd mcp add quantgpt `
+  --env QUANTGPT_TASK_BACKEND=thread `
+  -- C:\path\to\python.exe -m quantgpt
+```
+
+stdio 模式同样应在 `config.toml` 中设置 `tool_timeout_sec = 600`。Windows 推荐显式使用
+`QUANTGPT_TASK_BACKEND=thread`；process backend 也已加入口保护与 worker stdout 隔离。
+
 ## 快速开始（推荐）
 
 ### Claude Code

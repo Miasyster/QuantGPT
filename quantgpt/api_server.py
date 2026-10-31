@@ -11,7 +11,7 @@ Endpoints:
     POST /api/v1/feedback                — 提交问题反馈
     GET  /api/v1/health                  — 健康检查
 
-启动: DEEPSEEK_API_KEY=sk-xxx python -m quantgpt --transport http --port 8003
+启动: LLM_API_KEY=sk-xxx python -m quantgpt --transport http --port 8003
 """
 
 import asyncio

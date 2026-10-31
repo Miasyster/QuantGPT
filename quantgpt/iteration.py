@@ -322,13 +322,13 @@ def _call_llm(system_prompt: str, user_prompt: str, temperature: float = 0.9) ->
     from openai import OpenAI
 
     from .llm_service import clean_expression as _clean_expression
+    from .llm_service import get_llm_api_key, get_llm_base_url, get_llm_model
 
-    api_key = os.environ.get("DEEPSEEK_API_KEY")
+    api_key = get_llm_api_key()
     if not api_key:
-        raise RuntimeError("DEEPSEEK_API_KEY not set")
-    base_url = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
-    model = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
-    client = OpenAI(api_key=api_key, base_url=base_url)
+        raise RuntimeError("LLM_API_KEY not set")
+    model = get_llm_model()
+    client = OpenAI(api_key=api_key, base_url=get_llm_base_url())
 
     for attempt in range(3):
         try:

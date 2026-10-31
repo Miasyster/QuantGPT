@@ -3,7 +3,6 @@
 import asyncio
 import json
 import logging
-import os
 import threading
 import time
 import traceback
@@ -25,13 +24,13 @@ from ..iteration import compute_factor_score
 from ..llm_service import (
     call_deepseek as _call_deepseek,
 )
-from ..llm_service import get_llm_api_key
 from ..llm_service import (
     call_fix_expression as _call_fix_expression,
 )
 from ..llm_service import (
     call_interpret_factor as _call_interpret_factor,
 )
+from ..llm_service import get_llm_api_key
 from ..llm_service import (
     looks_like_expression as _looks_like_expression,
 )

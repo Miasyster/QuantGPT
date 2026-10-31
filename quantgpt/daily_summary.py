@@ -10,7 +10,6 @@ Pipeline:
 
 import json
 import logging
-import os
 import re
 from dataclasses import asdict
 from datetime import datetime, timezone
@@ -21,6 +20,7 @@ from openai import OpenAI
 
 from .factor_signals import FactorSignal, compute_factor_signals
 from .industry_analysis import compute_industry_signals
+from .llm_service import get_llm_api_key, get_llm_base_url, get_llm_model
 from .market_data import MarketDataFetcher, fetch_benchmark_returns, get_universe
 from .market_regime import derive_market_regime
 
@@ -28,10 +28,6 @@ logger = logging.getLogger(__name__)
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 _TEMPLATES_PATH = Path(__file__).resolve().parent / "templates" / "factors.json"
-
-_DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
-_DEEPSEEK_BASE_URL = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
-_DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
 
 
 def _load_factor_templates() -> list:
@@ -325,10 +321,10 @@ def _build_llm_prompt(
 
 
 def _call_llm(prompt: str) -> str:
-    """Call DeepSeek LLM for market summary."""
-    client = OpenAI(api_key=_DEEPSEEK_API_KEY, base_url=_DEEPSEEK_BASE_URL)
+    """Call the configured LLM for market summary."""
+    client = OpenAI(api_key=get_llm_api_key(), base_url=get_llm_base_url())
     resp = client.chat.completions.create(
-        model=_DEEPSEEK_MODEL,
+        model=get_llm_model(),
         messages=[
             {"role": "system", "content": _SYSTEM_PROMPT},
             {"role": "user", "content": prompt},
@@ -336,7 +332,7 @@ def _call_llm(prompt: str) -> str:
         temperature=0.4,
         max_tokens=5000,
     )
-    text = resp.choices[0].message.content.strip()
+    text = (resp.choices[0].message.content or "").strip()
 
     # Strip any preamble before the first markdown heading
     match = re.search(r'^(#{1,3}\s)', text, re.MULTILINE)

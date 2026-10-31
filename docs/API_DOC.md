@@ -43,9 +43,9 @@ python -m quantgpt --prefetch hs300 csi500
 | 变量 | 必填 | 默认值 | 说明 |
 |------|------|--------|------|
 | `DATABASE_URL` | 是 | — | PostgreSQL 连接串 |
-| `DEEPSEEK_API_KEY` | 是 | — | DeepSeek API Key |
-| `DEEPSEEK_BASE_URL` | 否 | `https://api.deepseek.com/v1` | LLM API 地址 |
-| `DEEPSEEK_MODEL` | 否 | `deepseek-chat` | 模型名称 |
+| `LLM_API_KEY` | 否 | — | LLM API Key，未设置时回退到 `DEEPSEEK_API_KEY` |
+| `LLM_BASE_URL` | 否 | `https://api.deepseek.com/v1` | LLM API 地址，未设置时回退到 `DEEPSEEK_BASE_URL` |
+| `LLM_MODEL` | 否 | `deepseek-chat` | 模型名称，未设置时回退到 `DEEPSEEK_MODEL` |
 | `JWT_SECRET` | 是 | — | JWT 签名密钥 |
 | `QUANTGPT_CORS_ORIGINS` | 否 | `*` | CORS 允许源,逗号分隔 |
 | `QUANTGPT_ADMIN_PASSWORD` | 否 | — | 管理后台密码 |

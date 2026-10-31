@@ -65,10 +65,12 @@ bash restart.sh
 
 ```bash
 # 不填则为纯表达式模式（手动输入因子表达式，无 AI 生成）
-DEEPSEEK_API_KEY=sk-你的key
-DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
-DEEPSEEK_MODEL=deepseek-chat
+LLM_API_KEY=sk-你的key
+LLM_BASE_URL=https://api.deepseek.com/v1
+LLM_MODEL=deepseek-chat
 ```
+
+可换成任何兼容 OpenAI 接口的模型。旧变量 `DEEPSEEK_API_KEY`、`DEEPSEEK_BASE_URL`、`DEEPSEEK_MODEL` 仍然有效，同时设置时优先使用 `LLM_*`。
 
 ### 3.2 数据库
 

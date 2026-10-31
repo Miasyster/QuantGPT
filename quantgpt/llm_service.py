@@ -208,17 +208,29 @@ def validate_parentheses(expr: str) -> str | None:
     return None
 
 
+def get_llm_api_key() -> str:
+    """LLM_* takes precedence; DEEPSEEK_* is kept for existing configurations."""
+    return os.environ.get("LLM_API_KEY") or os.environ.get("DEEPSEEK_API_KEY") or ""
+
+
+def get_llm_base_url() -> str:
+    return os.environ.get("LLM_BASE_URL") or os.environ.get("DEEPSEEK_BASE_URL") or "https://api.deepseek.com/v1"
+
+
+def get_llm_model() -> str:
+    return os.environ.get("LLM_MODEL") or os.environ.get("DEEPSEEK_MODEL") or "deepseek-chat"
+
+
 def _get_client():
     from openai import OpenAI
-    api_key = os.environ.get("DEEPSEEK_API_KEY")
+    api_key = get_llm_api_key()
     if not api_key:
-        raise RuntimeError("DEEPSEEK_API_KEY environment variable is not set")
-    base_url = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
-    return OpenAI(api_key=api_key, base_url=base_url)
+        raise RuntimeError("LLM_API_KEY environment variable is not set")
+    return OpenAI(api_key=api_key, base_url=get_llm_base_url())
 
 
 def _get_model() -> str:
-    return os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
+    return get_llm_model()
 
 
 def call_deepseek(prompt: str) -> str:
@@ -300,8 +312,7 @@ def call_interpret_factor(
     backtest_summary: dict,
 ) -> dict:
     """Call LLM to interpret factor economic meaning."""
-    api_key = os.environ.get("DEEPSEEK_API_KEY")
-    if not api_key:
+    if not get_llm_api_key():
         return {}
 
     try:
@@ -336,7 +347,7 @@ def call_interpret_factor(
             max_tokens=600,
             timeout=30,
         )
-        raw = resp.choices[0].message.content.strip()
+        raw = (resp.choices[0].message.content or "").strip()
         if raw.startswith("```"):
             raw = raw.split("```")[1]
             if raw.startswith("json"):

@@ -3,7 +3,6 @@
 import asyncio
 import json
 import logging
-import os
 import threading
 import time
 import traceback
@@ -31,6 +30,7 @@ from ..llm_service import (
 from ..llm_service import (
     call_interpret_factor as _call_interpret_factor,
 )
+from ..llm_service import get_llm_api_key
 from ..llm_service import (
     looks_like_expression as _looks_like_expression,
 )
@@ -144,12 +144,12 @@ def _run_backtest_task(task_id: str, req: AutoBacktestRequest, user_id: str):
                 pass
 
         if expression is None:
-            if not os.environ.get("DEEPSEEK_API_KEY"):
+            if not get_llm_api_key():
                 task["status"] = "failed"
                 task["error"] = (
                     "未配置 LLM API Key，无法解析自然语言。"
                     "请直接输入因子表达式（如 rank(close/ts_mean(close,20))），"
-                    "或设置 DEEPSEEK_API_KEY 环境变量启用自然语言输入。"
+                    "或设置 LLM_API_KEY 环境变量启用自然语言输入。"
                 )
                 return
             expression = _call_deepseek(req.prompt)
@@ -169,7 +169,7 @@ def _run_backtest_task(task_id: str, req: AutoBacktestRequest, user_id: str):
 
         paren_err = _validate_parentheses(expression)
         if paren_err:
-            if os.environ.get("DEEPSEEK_API_KEY"):
+            if get_llm_api_key():
                 logger.warning(f"[{task_id}] parentheses error, attempting fix: {paren_err}")
                 expression = _call_fix_expression(expression, paren_err, req.prompt)
                 task["expression"] = expression
@@ -182,7 +182,7 @@ def _run_backtest_task(task_id: str, req: AutoBacktestRequest, user_id: str):
             func_ = parse_expression(expression)
             func_(dummy)
         except Exception as e:
-            if os.environ.get("DEEPSEEK_API_KEY"):
+            if get_llm_api_key():
                 logger.warning(f"[{task_id}] validation failed, attempting fix: {e}")
                 try:
                     fixed = _call_fix_expression(expression, str(e), req.prompt)

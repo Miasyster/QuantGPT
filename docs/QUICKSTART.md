@@ -82,7 +82,7 @@ rank(-1 * pe)
 1. Get a DeepSeek API key from [platform.deepseek.com](https://platform.deepseek.com)
 2. Edit `.env`:
    ```
-   DEEPSEEK_API_KEY=sk-your-key-here
+   LLM_API_KEY=sk-your-key-here
    ```
 3. Restart: `bash restart.sh`
 

@@ -2,9 +2,19 @@ import { useState } from "react";
 import { BarChart3, X, Terminal, Copy, Check, ExternalLink, Sun, Moon } from "lucide-react";
 import { useColorMode } from "../contexts/ColorModeContext";
 
-export const APP_VERSION = "v2.8.1";
+export const APP_VERSION = "v2.9.0";
 
 const CHANGELOG = [
+  {
+    version: "v2.9.0",
+    date: "2026-10-31",
+    items: [
+      "新增 LLM_* 配置项，可接入任意 OpenAI 兼容模型",
+      "修复 baostock 输出污染 MCP stdio 通道",
+      "修复 LLM 返回空内容时解读和日报报错",
+      "优化 Codex 接入文档，统一使用 /mcp 入口",
+    ],
+  },
   {
     version: "v2.8.1",
     date: "2026-10-31",

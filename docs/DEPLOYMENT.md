@@ -78,6 +78,8 @@ DEEPSEEK_MODEL=deepseek-chat
 # DATABASE_URL=postgresql+asyncpg://quantgpt:password@localhost:5433/quantgpt
 ```
 
+Docker 部署默认把 SQLite 存放在 `quantgpt-data` 卷（`/app/data/quantgpt.db`），不再挂载项目根目录的 `quantgpt.db`。升级时如需保留旧数据，请把旧文件复制到该卷中。
+
 ### 3.3 认证
 
 ```bash

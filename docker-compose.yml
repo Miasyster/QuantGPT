@@ -6,12 +6,12 @@ services:
     volumes:
       - quantgpt-data:/app/data
       - quantgpt-reports:/app/reports
-      - ./quantgpt.db:/app/quantgpt.db
     env_file:
       - .env
     environment:
       - AUTH_DISABLED=true
-      - DATABASE_URL=postgresql+asyncpg://quantgpt:password@host.docker.internal:5433/quantgpt
+      # SQLite in the data volume by default; set DATABASE_URL in .env to use PostgreSQL
+      - DATABASE_URL=${DATABASE_URL:-sqlite+aiosqlite:////app/data/quantgpt.db}
     restart: unless-stopped
 
 volumes:

@@ -350,6 +350,9 @@ class FundamentalDataFetcher:
         # merge_asof requires the key column to be sorted.
         # Since we merge by stock_code, do it per-stock to avoid cross-stock sorting issues.
         market_df = market_df.copy()
+        # merge_asof also rejects keys of different datetime precision (ns vs us)
+        market_df["trade_date"] = pd.to_datetime(market_df["trade_date"]).astype("datetime64[ns]")
+        qdf["pub_date"] = pd.to_datetime(qdf["pub_date"]).astype("datetime64[ns]")
         result_parts = []
         for code, mkt_group in market_df.groupby("stock_code", sort=False):
             fund_group = qdf[qdf["stock_code"] == code].sort_values("pub_date")

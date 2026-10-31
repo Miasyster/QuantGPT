@@ -884,6 +884,10 @@ class ExpressionParser:
                 return _wq_unknown_field_stub
 
         if col_name not in _ALLOWED_COLUMNS:
+            if col_name in _WQ_COLUMNS or col_name in _WQ_EXTENDED_FIELDS:
+                raise ValueError(
+                    f"Unknown column or variable: {col_name!r}（该字段仅在 WQ BRAIN 模式下可用，本地回测无数据）"
+                )
             raise ValueError(f"Unknown column or variable: {col_name!r}")
         return lambda df, _c=col_name: df[_c]
 

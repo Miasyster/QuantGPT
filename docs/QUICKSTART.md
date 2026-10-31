@@ -53,7 +53,6 @@ Via API:
 ```bash
 curl -X POST http://localhost:8003/api/v1/auto_backtest \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <token>" \
   -d '{"expression": "rank(close / ts_mean(close, 20))", "universe": "hs300"}'
 ```
 

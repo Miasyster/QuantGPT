@@ -63,10 +63,20 @@ def main():
         uvicorn.run(app, host=args.host, port=args.port)
     else:
         from .mcp_server import mcp
-        if args.transport in ("sse", "streamable-http"):
-            os.environ.setdefault("FASTMCP_HOST", args.host)
-            os.environ.setdefault("FASTMCP_PORT", str(args.port))
-        mcp.run(transport=args.transport)
+        if args.transport == "stdio":
+            # Keep stdout protocol-only even when data providers call print().
+            from .mcp_transport import run_clean_stdio
+            run_clean_stdio(mcp)
+        elif args.transport == "streamable-http":
+            from .mcp_transport import run_streamable_http
+            run_streamable_http(mcp, host=args.host, port=args.port, path="/")
+        else:
+            # Settings must be assigned after FastMCP construction; setting the
+            # FASTMCP_* environment variables here is too late.
+            mcp.settings.host = args.host
+            mcp.settings.port = args.port
+            mcp.run(transport=args.transport)
 
 
-main()
+if __name__ == "__main__":
+    main()

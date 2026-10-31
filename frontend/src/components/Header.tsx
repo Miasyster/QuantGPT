@@ -2,9 +2,21 @@ import { useState } from "react";
 import { BarChart3, X, Terminal, Copy, Check, ExternalLink, Sun, Moon } from "lucide-react";
 import { useColorMode } from "../contexts/ColorModeContext";
 
-export const APP_VERSION = "v2.8.0";
+export const APP_VERSION = "v2.8.1";
 
 const CHANGELOG = [
+  {
+    version: "v2.8.1",
+    date: "2026-10-31",
+    items: [
+      "修复干净环境下 Docker 部署无法启动",
+      "修复 DATABASE_URL 留空时启动报错",
+      "修复 restart.sh 未使用虚拟环境",
+      "修复基本面数据日期精度不兼容报错",
+      "优化 make setup 的 Python 版本检查",
+      "优化 WQ BRAIN 专属字段的本地报错提示",
+    ],
+  },
   {
     version: "v2.8.0",
     date: "2026-04-30",

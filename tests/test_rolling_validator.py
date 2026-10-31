@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quantgpt.rolling_validator import RollingValidator, RollingResult, WindowResult, run_rolling_validation
+from quantgpt.rolling_validator import RollingResult, RollingValidator, WindowResult, run_rolling_validation
 
 
 @pytest.fixture

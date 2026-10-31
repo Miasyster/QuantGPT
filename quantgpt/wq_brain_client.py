@@ -340,7 +340,7 @@ class WQBrainClient:
 
             return poll_result
 
-        return {"status_code": 200, "ok": False, "detail": f"submit failed after 3 outer retries, alpha still UNSUBMITTED"}
+        return {"status_code": 200, "ok": False, "detail": "submit failed after 3 outer retries, alpha still UNSUBMITTED"}
 
     def _poll_alpha_submission(self, alpha_id: str, max_polls: int = 12, interval: int = 10) -> dict:
         """Poll alpha status until platform confirms submission or SC check completes."""

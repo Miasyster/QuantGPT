@@ -1,8 +1,6 @@
 """Tests for Celery JSON serialization helpers (to_json_transport / from_json_transport)."""
 
-import math
 import os
-import tempfile
 
 import numpy as np
 import pandas as pd

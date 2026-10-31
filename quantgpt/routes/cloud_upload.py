@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, field_validator
 
 from ..auth import get_current_user
-from ..cloud_client import CloudAPIError, CloudClient, _VALID_UNIVERSES, get_cloud_url, is_configured
+from ..cloud_client import _VALID_UNIVERSES, CloudAPIError, CloudClient, get_cloud_url, is_configured
 from ..models import User
 
 logger = logging.getLogger(__name__)

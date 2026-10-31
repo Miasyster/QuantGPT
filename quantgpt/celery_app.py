@@ -96,7 +96,6 @@ def from_json_transport(obj):
 
 
 def _save_df(df, type_tag: str) -> dict:
-    import pandas as pd
 
     CELERY_DATA_DIR.mkdir(parents=True, exist_ok=True)
     path = CELERY_DATA_DIR / f"{uuid.uuid4().hex}.parquet"

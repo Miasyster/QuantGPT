@@ -28,7 +28,8 @@ from sqlalchemy import select, update
 
 from . import task_store
 from .db import close_db, init_db
-from .models import Task as TaskModel, User
+from .models import Task as TaskModel
+from .models import User
 
 logger = logging.getLogger(__name__)
 
@@ -163,17 +164,17 @@ app.add_middleware(
 # Register route modules
 from .routes.admin import router as admin_router
 from .routes.backtest_tasks import router as backtest_tasks_router
+from .routes.cloud_upload import router as cloud_upload_router
 from .routes.comparison import router as comparison_router
 from .routes.composite import router as composite_router
 from .routes.daily_summary import router as daily_summary_router
 from .routes.factor_library import router as factor_library_router
+from .routes.factor_values import router as factor_values_router
 from .routes.feedback import router as feedback_router
 from .routes.iteration_routes import router as iteration_router
 from .routes.sessions import router as sessions_router
-from .routes.factor_values import router as factor_values_router
 from .routes.wq_brain import router as wq_brain_router
 from .routes.wq_brain_batch import router as wq_brain_batch_router
-from .routes.cloud_upload import router as cloud_upload_router
 
 app.include_router(sessions_router)
 app.include_router(admin_router)

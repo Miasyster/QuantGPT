@@ -2,7 +2,6 @@
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from quantgpt.adversarial_validator import (
     AdversarialValidator,

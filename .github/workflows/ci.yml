@@ -33,7 +33,8 @@ jobs:
         run: pytest tests/ -x -q --cov=quantgpt --cov-report=term-missing --cov-fail-under=33
 
       - name: Dependency audit
-        run: pip-audit --strict --desc -f json 2>/dev/null | python3 -c "
+        run: |
+          pip-audit --strict --desc -f json 2>/dev/null | python3 -c "
           import sys, json
           data = json.load(sys.stdin)
           vulns = data.get('dependencies', [])

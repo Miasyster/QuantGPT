@@ -1,6 +1,5 @@
 """Tests for quantgpt.market_data — pure logic and cache behavior."""
 
-import os
 import tempfile
 
 import numpy as np
@@ -15,7 +14,6 @@ from quantgpt.market_data import (
     _to_rq_code,
     get_universe,
 )
-
 
 # ─── Code conversion ─────────────────────────────────────────────
 

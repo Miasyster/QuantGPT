@@ -15,7 +15,6 @@ import asyncio
 import json
 import logging
 import sys
-import time
 import traceback
 
 import pandas as pd
@@ -28,15 +27,14 @@ from .fundamental_data import ALL_FUNDAMENTAL_NAMES
 from .market_data import BENCHMARK_CODES, UNIVERSES, MarketDataFetcher, fetch_benchmark_returns, get_universe
 from .mcp_task_helper import complete_mcp_task, start_mcp_task
 from .report import generate_report
+from .task_executor import _run_backtest_in_process, get_executor
 from .wq_brain_service import (
     run_batch_simulation,
     run_check_alphas,
     run_list_alphas,
     run_single_simulation,
     run_submit_by_ids,
-    safe_float,
 )
-from .task_executor import _run_backtest_in_process, get_executor
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s", stream=sys.stderr)
 logger = logging.getLogger(__name__)
@@ -574,7 +572,8 @@ async def wq_brain_submit(
     Returns:
         JSON with IS/OOS metrics, alpha_id, checks, submittable status.
     """
-    from .wq_brain_client import get_client, is_configured as _wq_configured
+    from .wq_brain_client import get_client
+    from .wq_brain_client import is_configured as _wq_configured
 
     task_id = await start_mcp_task("wq_brain_submit", expression, {
         "expression": expression, "tag": tag, "region": region, "universe": universe,
@@ -645,7 +644,8 @@ async def wq_brain_batch_submit(
     Returns:
         JSON with per-combination results, best_fitness, submittable_count.
     """
-    from .wq_brain_client import get_client, is_configured as _wq_configured
+    from .wq_brain_client import get_client
+    from .wq_brain_client import is_configured as _wq_configured
 
     regions = regions or ["USA"]
     delays = delays or [1]
@@ -710,7 +710,8 @@ async def wq_brain_submit_by_ids(
     Returns:
         JSON with per-alpha result (ACTIVE/SC_FAIL/TIMEOUT) and summary.
     """
-    from .wq_brain_client import get_client, is_configured as _wq_configured
+    from .wq_brain_client import get_client
+    from .wq_brain_client import is_configured as _wq_configured
 
     if account != "primary":
         return json.dumps({"error": "Alpha 提交仅允许 primary 账号"})
@@ -767,7 +768,8 @@ async def wq_brain_list_alphas(
     Returns:
         JSON with alpha list, each containing alpha_id, expression, metrics.
     """
-    from .wq_brain_client import get_client, is_configured as _wq_configured
+    from .wq_brain_client import get_client
+    from .wq_brain_client import is_configured as _wq_configured
 
     if not _wq_configured(account):
         return json.dumps({"error": f"WQ BRAIN 未配置 (account={account})"})
@@ -806,7 +808,8 @@ async def wq_brain_check_alphas(
     Returns:
         JSON with summary and per-alpha status.
     """
-    from .wq_brain_client import get_client, is_configured as _wq_configured
+    from .wq_brain_client import get_client
+    from .wq_brain_client import is_configured as _wq_configured
 
     if not _wq_configured(account):
         return json.dumps({"error": f"WQ BRAIN 未配置 (account={account})"})
@@ -847,8 +850,9 @@ async def wq_brain_finalize_submissions(
     _error_msg = None
     _result = None
     try:
-        from .wq_brain_client import get_client, is_configured as _wq_configured
         from .routes.wq_brain_batch import _finalize_alpha_statuses
+        from .wq_brain_client import get_client
+        from .wq_brain_client import is_configured as _wq_configured
 
         if not _wq_configured(account):
             return json.dumps({"error": f"WQ BRAIN 未配置 (account={account})"})

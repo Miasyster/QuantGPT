@@ -1,6 +1,5 @@
 """WQ BRAIN batch operations — param sweep, batch submit by ID, batch status check, finalize."""
 
-import itertools
 import logging
 import os
 import threading
@@ -13,16 +12,15 @@ from pydantic import BaseModel, Field
 from ..auth import get_current_user
 from ..models import User
 from ..task_store import (
+    MAX_ACTIVE_TASKS,
     active_task_count,
     check_rate_limit,
     persist_task_to_db,
     tasks,
     tasks_lock,
-    MAX_ACTIVE_TASKS,
 )
 from ..wq_brain_client import get_client, is_configured
 from ..wq_brain_service import (
-    fitness_to_grade,
     run_batch_simulation,
     run_check_alphas,
     run_submit_by_ids,

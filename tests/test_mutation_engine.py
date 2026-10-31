@@ -1,8 +1,7 @@
 """Tests for mutation_engine.py — diagnosis and mutation strategy selection."""
 
-import pytest
 
-from quantgpt.mutation_engine import Diagnosis, MutationEngine, MutationStrategy
+from quantgpt.mutation_engine import MutationEngine, MutationStrategy
 
 
 def _make_engine(expression="rank(ts_mean(close, 20))", score=50, ic_mean=0.03,

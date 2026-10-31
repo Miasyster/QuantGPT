@@ -10,7 +10,6 @@ import logging
 from datetime import date
 
 import numpy as np
-import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, field_validator
 

@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quantgpt.rust_bridge import RUST_AVAILABLE, eval_factor_expression, compute_metrics_rust
+from quantgpt.rust_bridge import RUST_AVAILABLE, compute_metrics_rust, eval_factor_expression
 
 
 @pytest.fixture

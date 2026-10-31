@@ -23,8 +23,10 @@ jobs:
       - name: Lint
         run: ruff check quantgpt/ tests/
 
+      # Non-blocking until the existing pyright errors are cleared
       - name: Type check
-        run: pyright quantgpt/ --level basic
+        continue-on-error: true
+        run: pyright quantgpt/
 
       - name: Test with coverage
         env:

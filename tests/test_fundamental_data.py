@@ -1,8 +1,6 @@
 """Tests for quantgpt.fundamental_data — variable registry, detection, and quarter logic."""
 
-import numpy as np
 import pandas as pd
-import pytest
 
 from quantgpt.fundamental_data import (
     ALL_FUNDAMENTAL_NAMES,
@@ -14,7 +12,6 @@ from quantgpt.fundamental_data import (
     enrich_market_data,
     get_needed_apis,
 )
-
 
 # ─── Variable registry consistency ───────────────────────────────
 

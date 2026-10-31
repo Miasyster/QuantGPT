@@ -1,12 +1,11 @@
 """Tests for wq_brain_client.py and routes/wq_brain.py."""
 
 import os
-import time
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from quantgpt.wq_brain_client import SUBMIT_THRESHOLDS, WQBrainClient, configured_accounts, get_client, is_configured
+from quantgpt.wq_brain_client import WQBrainClient, configured_accounts, get_client, is_configured
 
 pytestmark = pytest.mark.asyncio
 
@@ -130,16 +129,18 @@ class TestWQBrainSubmitEndpoint:
             assert resp.status_code == 503
 
     async def test_submit_creates_task(self, client):
-        with patch.dict(os.environ, {"WQ_BRAIN_EMAIL": "a@b.com", "WQ_BRAIN_PASSWORD": "pw"}, clear=False):
-            with patch("quantgpt.routes.wq_brain._run_wq_brain_task"):
-                resp = await client.post("/api/v1/wq-brain/submit", json={
-                    "expression": "rank(close)",
-                    "tag": "test-agent",
-                })
-                assert resp.status_code == 202
-                data = resp.json()
-                assert "task_id" in data
-                assert data["status"] == "pending"
+        with (
+            patch.dict(os.environ, {"WQ_BRAIN_EMAIL": "a@b.com", "WQ_BRAIN_PASSWORD": "pw"}, clear=False),
+            patch("quantgpt.routes.wq_brain._run_wq_brain_task"),
+        ):
+            resp = await client.post("/api/v1/wq-brain/submit", json={
+                "expression": "rank(close)",
+                "tag": "test-agent",
+            })
+            assert resp.status_code == 202
+            data = resp.json()
+            assert "task_id" in data
+            assert data["status"] == "pending"
 
 
 class TestSubmittedAlphasEndpoint:

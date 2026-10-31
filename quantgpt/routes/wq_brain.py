@@ -7,21 +7,20 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import get_current_user
 from ..db import get_db
 from ..models import User
 from ..task_store import (
+    MAX_ACTIVE_TASKS,
     active_task_count,
     check_rate_limit,
     persist_task_to_db,
     tasks,
     tasks_lock,
-    MAX_ACTIVE_TASKS,
 )
-from ..wq_brain_client import SUBMIT_THRESHOLDS, WQBrainClient, configured_accounts, get_client, is_configured
+from ..wq_brain_client import SUBMIT_THRESHOLDS, configured_accounts, get_client, is_configured
 from ..wq_brain_service import fitness_to_grade, run_list_alphas, run_single_simulation, safe_float
 
 logger = logging.getLogger(__name__)
@@ -191,7 +190,8 @@ async def list_submitted_alphas(
     limit: int = 50,
     offset: int = 0,
 ):
-    from sqlalchemy import func, select as sa_select
+    from sqlalchemy import func
+    from sqlalchemy import select as sa_select
 
     from ..models import SubmittedAlpha
 

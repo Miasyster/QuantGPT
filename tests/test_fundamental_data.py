@@ -8,6 +8,7 @@ from quantgpt.fundamental_data import (
     ALL_FUNDAMENTAL_NAMES,
     DERIVED_VARIABLES,
     FUNDAMENTAL_VARIABLES,
+    FundamentalDataFetcher,
     _quarter_range,
     detect_fundamental_vars,
     enrich_market_data,
@@ -171,3 +172,17 @@ class TestEnrichMarketData:
         result = enrich_market_data(df, {"roe"}, ["sh.600519"], "2024-01-01", "2024-01-31")
         assert result is not None
         assert len(result) >= 0
+
+    def test_align_to_daily_handles_mixed_datetime_precision(self):
+        market = pd.DataFrame({
+            "trade_date": pd.to_datetime(["2024-01-02", "2024-05-06"]).astype("datetime64[ns]"),
+            "stock_code": ["sh.600519", "sh.600519"],
+            "close": [1800.0, 1700.0],
+        })
+        quarterly = pd.DataFrame({
+            "stock_code": ["sh.600519"],
+            "pub_date": pd.to_datetime(["2024-04-30"]).astype("datetime64[us]"),
+            "roe": [0.1],
+        })
+        result = FundamentalDataFetcher().align_to_daily(quarterly, market, {"roe"})
+        assert result["roe"].isna().tolist() == [True, False]

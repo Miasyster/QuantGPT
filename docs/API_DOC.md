@@ -60,11 +60,7 @@ python -m quantgpt --prefetch hs300 csi500
 
 ## 认证
 
-所有 API (除健康检查、管理后台) 需要 Bearer Token。
-
-```
-Authorization: Bearer <access_token>
-```
+> 当前版本已移除认证：所有 API 无需 Token，请求统一按本地开发用户处理。下文的 `Authorization` 请求头和 `/auth/*` 登录流程可忽略。
 
 ### POST /api/v1/auth/send-code
 

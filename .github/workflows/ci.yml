@@ -33,7 +33,8 @@ jobs:
         run: pytest tests/ -x -q --cov=quantgpt --cov-report=term-missing --cov-fail-under=33
 
       - name: Dependency audit
-        run: pip-audit --strict --desc -f json 2>/dev/null | python3 -c "
+        run: |
+          pip-audit --strict --desc -f json 2>/dev/null | python3 -c "
           import sys, json
           data = json.load(sys.stdin)
           vulns = data.get('dependencies', [])
@@ -50,6 +51,25 @@ jobs:
           else:
               print('No direct-dependency vulnerabilities')
           "
+
+  docker-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start from a clean checkout
+        run: |
+          cp .env.example .env
+          docker compose up -d --build
+
+      - name: Wait for health check
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:8003/api/v1/health && exit 0
+            sleep 2
+          done
+          docker compose logs
+          exit 1
 
   frontend:
     runs-on: ubuntu-latest

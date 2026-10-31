@@ -44,6 +44,10 @@ class TestColumnReference:
         with pytest.raises(ValueError, match="Unknown column"):
             parse_expression("nonexistent_col")
 
+    def test_wq_only_column_explains_local_limitation(self):
+        with pytest.raises(ValueError, match="debt.*WQ BRAIN"):
+            parse_expression("debt / enterprise_value")
+
 
 class TestNumericLiteral:
     def test_integer(self, sample_df):

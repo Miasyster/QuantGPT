@@ -15,6 +15,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from . import adata_backend
+
 logger = logging.getLogger(__name__)
 
 # Global lock for baostock — it only supports one session per process
@@ -523,6 +525,9 @@ class MarketDataFetcher:
         end_date: str,
     ) -> pd.DataFrame | None:
         """Fetch multiple stocks with caching. rqdatac batch → baostock fallback."""
+        if adata_backend.is_enabled() and not CACHE_ONLY:
+            return adata_backend.fetch_stocks(stock_codes, start_date, end_date)
+
         all_data: list[pd.DataFrame] = []
         to_fetch: list[str] = []
 
@@ -614,6 +619,10 @@ def fetch_benchmark_returns(
 ) -> pd.Series | None:
     """Fetch benchmark index daily returns: cache → rqdatac → baostock."""
     info = BENCHMARK_CODES.get(benchmark, BENCHMARK_CODES["hs300"])
+    if adata_backend.is_enabled() and not CACHE_ONLY and start_date:
+        resolved = benchmark if benchmark in BENCHMARK_CODES else "hs300"
+        return adata_backend.fetch_benchmark_returns(resolved, info["name"], start_date, end_date)
+
     cache_dir = cache_dir or str(_PROJECT_ROOT / "data" / "benchmark")
     os.makedirs(cache_dir, exist_ok=True)
 

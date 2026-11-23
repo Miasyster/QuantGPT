@@ -3,7 +3,6 @@ import type { Task, IterationCandidate } from "../types/backtest";
 import { getReportUrl } from "../api/client";
 import { pct, num } from "../utils/format";
 import { useColorMode } from "../contexts/ColorModeContext";
-import { Cloud } from "lucide-react";
 
 interface Props {
   parentTaskId: string;
@@ -82,9 +81,6 @@ function CandidateRow({
             <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${GRADE_COLORS[candidate.grade] || ""}`}>
               {candidate.grade}
             </span>
-            {candidate.cloud_validation && (
-              <Cloud className={`h-3 w-3 ${candidate.cloud_validation.status === "active" ? "text-emerald-500" : "text-gray-400"}`} />
-            )}
           </span>
         </td>
         <td className="px-3 py-2 text-center text-sm">{num(candidate.report_metrics.sharpe)}</td>
@@ -147,25 +143,6 @@ function CandidateRow({
                 </a>
               </div>
             </div>
-            {candidate.cloud_validation && (
-              <div className={`mt-2 flex items-center gap-3 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                <Cloud className="h-3.5 w-3.5 shrink-0" />
-                <span>Cloud 独立验证：</span>
-                <span className={candidate.cloud_validation.status === "active"
-                  ? isDark ? "text-emerald-400 font-medium" : "text-emerald-600 font-medium"
-                  : isDark ? "text-red-400" : "text-red-600"
-                }>
-                  {candidate.cloud_validation.status === "active" ? "通过" : "未通过"}
-                </span>
-                {candidate.cloud_validation.is && (
-                  <>
-                    <span>IC: {candidate.cloud_validation.is.ic_mean?.toFixed(4) ?? "—"}</span>
-                    <span>IR: {candidate.cloud_validation.is.ic_ir?.toFixed(4) ?? "—"}</span>
-                    <span>Fitness: {candidate.cloud_validation.is.fitness?.toFixed(4) ?? "—"}</span>
-                  </>
-                )}
-              </div>
-            )}
             <div className={`mt-2 text-xs font-mono break-all ${isDark ? "text-gray-400" : "text-gray-500"}`}>
               {candidate.expression}
             </div>

@@ -293,8 +293,6 @@ def _run_backtest_task(task_id: str, req: AutoBacktestRequest, user_id: str):
             logger.warning(f"[{task_id}] interpretation failed: {e}")
 
         ao_score_val = anti_overfit_result.get("score") if anti_overfit_result else None
-        factor_df = result.get("_factor_df")
-        data_days = len(factor_df["trade_date"].unique()) if factor_df is not None else 0
         scoring = compute_factor_score(
             backtest_summary={
                 "long_short_sharpe": result["long_short_sharpe"],
@@ -308,25 +306,9 @@ def _run_backtest_task(task_id: str, req: AutoBacktestRequest, user_id: str):
             },
             report_metrics=report_result["metrics"],
             anti_overfit_score=ao_score_val,
-            data_days=data_days,
         )
         interpretation["rating"] = scoring["grade"]
         interpretation["rating_reason"] = f"综合评分 {scoring['score']}/100"
-
-        cloud_validation = None
-        if scoring["grade"] == "A" and scoring.get("cloud_predicted_pass") and factor_df is not None:
-            task["status"] = "uploading_cloud"
-            try:
-                from ..cloud_client import auto_upload_to_cloud
-                cloud_validation = auto_upload_to_cloud(
-                    expression=expression,
-                    universe=req.universe,
-                    factor_df=result["_factor_df"],
-                    claimed_ic_mean=result.get("ic_mean"),
-                    claimed_ic_ir=result.get("ic_ir"),
-                )
-            except Exception as e:
-                logger.warning(f"[{task_id}] Cloud auto-upload failed: {e}")
 
         task["status"] = "completed"
 
@@ -371,7 +353,6 @@ def _run_backtest_task(task_id: str, req: AutoBacktestRequest, user_id: str):
             "adversarial": adversarial_result,
             "scoring": scoring,
             "interpretation": interpretation,
-            "cloud_validation": cloud_validation,
             "stock_factor_data": result.get("_stock_factor_data"),
             "nav_series": nav_series,
             "params": {

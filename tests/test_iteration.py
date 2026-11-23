@@ -31,7 +31,6 @@ class TestComputeFactorScore:
         assert "component_scores" in result
         assert set(result["component_scores"].keys()) == {
             "ic_mean", "ic_ir", "stability", "anti_overfit", "group_backtest",
-            "cloud_alignment",
         }
 
     def test_score_in_range(self):
@@ -44,7 +43,7 @@ class TestComputeFactorScore:
             long_short_sharpe=2.0, monotonicity_score=1.0, spread=0.10,
             turnover=0.05,
         )
-        result = compute_factor_score(summary, self._base_report(), anti_overfit_score=90, data_days=200)
+        result = compute_factor_score(summary, self._base_report(), anti_overfit_score=90)
         assert result["score"] >= 80
         assert result["grade"] == "A"
 
@@ -93,30 +92,6 @@ class TestComputeFactorScore:
         )
         result = compute_factor_score(summary, self._base_report(cagr=0, sharpe=0))
         assert result["score"] >= 0
-
-    def test_cloud_alignment_with_good_data(self):
-        summary = self._base_summary(ic_mean=0.03, ic_ir=0.5, turnover=0.10)
-        result = compute_factor_score(summary, self._base_report(), data_days=200)
-        cloud = result["component_scores"]["cloud_alignment"]
-        assert cloud > 50
-
-    def test_cloud_alignment_without_data_days(self):
-        summary = self._base_summary(ic_mean=0.03, ic_ir=0.5, turnover=0.10)
-        result = compute_factor_score(summary, self._base_report(), data_days=None)
-        cloud = result["component_scores"]["cloud_alignment"]
-        assert cloud >= 0
-
-    def test_cloud_predicted_pass(self):
-        summary = self._base_summary(ic_mean=0.03, ic_ir=0.3, turnover=0.10)
-        result = compute_factor_score(summary, self._base_report(), data_days=200)
-        assert "cloud_predicted_pass" in result
-
-    def test_high_turnover_penalizes_cloud_alignment(self):
-        low_to = self._base_summary(turnover=0.05)
-        high_to = self._base_summary(turnover=0.50)
-        r_low = compute_factor_score(low_to, self._base_report(), data_days=200)
-        r_high = compute_factor_score(high_to, self._base_report(), data_days=200)
-        assert r_low["component_scores"]["cloud_alignment"] > r_high["component_scores"]["cloud_alignment"]
 
 
 class TestIsDuplicateExpression:

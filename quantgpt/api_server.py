@@ -164,7 +164,6 @@ app.add_middleware(
 # Register route modules
 from .routes.admin import router as admin_router
 from .routes.backtest_tasks import router as backtest_tasks_router
-from .routes.cloud_upload import router as cloud_upload_router
 from .routes.comparison import router as comparison_router
 from .routes.composite import router as composite_router
 from .routes.daily_summary import router as daily_summary_router
@@ -188,7 +187,6 @@ app.include_router(feedback_router)
 app.include_router(factor_values_router)
 app.include_router(wq_brain_router)
 app.include_router(wq_brain_batch_router)
-app.include_router(cloud_upload_router)
 
 
 # ---- robots.txt ----

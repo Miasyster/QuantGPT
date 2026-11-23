@@ -2,9 +2,9 @@
 
 # QuantGPT
 
-**Agent-Driven Factor Research Engine — Autonomous Mining, Independent Validation on [QuantGPT Cloud](https://quant-gpt.com)**
+**Agent-Driven Factor Research Engine — Autonomous Mining, Evaluation & Validation**
 
-LLM Agent 自治因子挖矿 → 批量回测 → 多维评分 → 反过拟合验证 → [QuantGPT Cloud](https://quant-gpt.com) 独立验证 + 样本外跟踪 | 全程零人工干预
+LLM Agent 自治因子挖矿 → 批量回测 → 多维评分 → 反过拟合验证 → Walk-forward 样本外验证 | 全程零人工干预
 
 [![CI](https://github.com/Miasyster/quantgpt/actions/workflows/ci.yml/badge.svg)](https://github.com/Miasyster/quantgpt/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org)
@@ -32,7 +32,7 @@ LLM Agent 自治因子挖矿 → 批量回测 → 多维评分 → 反过拟合�
 
 ## What Is QuantGPT
 
-QuantGPT is an **agent-driven factor research engine** — not a backtest library, not a chatbot wrapper. It gives an LLM Agent (Claude, via MCP) a complete toolkit to autonomously discover, evaluate, iterate, and validate alpha factors, with zero human intervention per research cycle. Factors that pass local validation are automatically uploaded to [**QuantGPT Cloud**](https://quant-gpt.com) for independent verification and out-of-sample tracking — ensuring research results are reproducible and auditable.
+QuantGPT is an **agent-driven factor research engine** — not a backtest library, not a chatbot wrapper. It gives an LLM Agent (Claude, via MCP) a complete toolkit to autonomously discover, evaluate, iterate, and validate alpha factors, with zero human intervention per research cycle.
 
 The core architecture:
 
@@ -54,13 +54,6 @@ LLM Agent (Claude Code / Claude Desktop)
     │   ├── wq_brain_list_alphas   ← 查询已提交 alpha
     │   ├── wq_brain_check_alphas  ← 检查 alpha 状态
     │   └── wq_brain_finalize_submissions ← 最终提交确认
-    │
-    ├── QuantGPT Cloud             ← 独立验证平台 (quant-gpt.com)
-    │   ├── A 级因子自动上传
-    │   ├── 独立 IC/IR/Turnover 验证
-    │   ├── 样本外实时跟踪
-    │   ├── 因子去重（Self-Correlation 检测）
-    │   └── 公开可审计的研究记录
     │
     ├── Evolution Engine           ← 因子进化引擎
     │   ├── MutationEngine (8 方向突变)
@@ -93,14 +86,13 @@ QuantGPT 的模式是：**人类定义目标 → Agent 自治研究 → 人类�
 | 累计回测任务 | **370+** |
 | 单轮迭代（8 候选因子） | **~15 分钟** |
 | 表达式算子 | **60+（含非线性、三元、技术指标）** |
-| Cloud 独立验证 | **A 级因子自动上传 [quant-gpt.com](https://quant-gpt.com) 验证 + 样本外跟踪** |
 | WQ BRAIN 提交（可选） | **3 个因子 IS 全部 PASS，已提交（最佳 Fitness 1.26）** |
 
 ---
 
 ## Validated Results
 
-QuantGPT 产出的因子通过两层验证：本地多维评分 + [QuantGPT Cloud](https://quant-gpt.com) 独立 IC/IR 验证。高质量因子还可选提交至 WQ BRAIN。以下 3 个因子已通过 WQ BRAIN IS 检测并正式提交：
+QuantGPT 产出的因子先经过本地多维评分 + 反过拟合验证，高质量因子还可选提交至 WQ BRAIN。以下 3 个因子已通过 WQ BRAIN IS 检测并正式提交：
 
 | Factor | Expression | WQ Sharpe | WQ Fitness | WQ Returns | IS Tests | Status |
 |:-------|:-----------|:---------:|:----------:|:----------:|:--------:|:------:|
@@ -140,7 +132,7 @@ QuantGPT 产出的因子通过两层验证：本地多维评分 + [QuantGPT Clou
 
 > **This is QuantGPT's defining capability.**
 >
-> Agent 读知识库、设计假设、批量实验、分析结果、积累知识、自我迭代，每个结论经过双模型交叉验证。A 级因子自动上传 [QuantGPT Cloud](https://quant-gpt.com) 独立验证，建立可审计的样本外跟踪记录。
+> Agent 读知识库、设计假设、批量实验、分析结果、积累知识、自我迭代，每个结论经过双模型交叉验证。
 
 ### Research Cycle
 
@@ -249,7 +241,7 @@ results = batch_evaluate(
 </tr>
 </table>
 
-> **上面 Validated Results 中的因子就是这个流程的产出。** 多轮迭代，A 级因子自动上传 [QuantGPT Cloud](https://quant-gpt.com) 独立验证。完整方法论见 [Factor Mining Guide](docs/FACTOR_MINING.md)。
+> **上面 Validated Results 中的因子就是这个流程的产出。** 多轮迭代产出。完整方法论见 [Factor Mining Guide](docs/FACTOR_MINING.md)。
 
 ---
 
@@ -263,18 +255,18 @@ results = batch_evaluate(
 │  Agent      │  ┌──────────────────────┐   │   Data Layer          │
 │  Interface  │  │  Expression Parser   │   │  ┌─────────────────┐  │
 │             │  │  60+ operators       │   │  │ baostock (free)  │  │
-│ MCP Tools   │  │  Cloud + WQ compat.  │   │  │ akshare (free)   │  │
+│ MCP Tools   │  │  WQ compatible       │   │  │ akshare (free)   │  │
 │ REST API    │  └──────────┬───────────┘   │  │ PolarDB (opt)    │  │
 │ Web UI      │  ┌──────────▼───────────┐   │  │ Parquet cache    │  │
 │ (monitor)   │  │  Backtest Engine     │   │  └─────────────────┘  │
 │             │  │  Rank-based grouping │   │                       │
-│             │  │  Cloud aligned       │   │   AI Layer            │
+│             │  │  IC / group returns  │   │   AI Layer            │
 │             │  └──────────┬───────────┘   │  ┌─────────────────┐  │
 │             │  ┌──────────▼───────────┐   │  │ DeepSeek LLM    │  │
 │             │  │  Validation Suite    │   │  │ Factor design   │  │
 │             │  │  Anti-overfit (4x)   │   │  │ Cross-review    │  │
 │             │  │  Walk-forward        │   │  │ Mutation engine │  │
-│             │  │  QuantGPT Cloud      │   │  └─────────────────┘  │
+│             │  │                      │   │  └─────────────────┘  │
 │             │  │  WQ BRAIN (optional) │   │                       │
 │             │  └──────────────────────┘   │   Storage             │
 │             │                             │  ┌─────────────────┐  │
@@ -295,7 +287,6 @@ results = batch_evaluate(
 | Database | SQLite (default, zero-config) / PostgreSQL (optional) |
 | AI/LLM | DeepSeek (factor generation + cross-review) |
 | Market Data | baostock + akshare (free) → Parquet cache |
-| Cloud Validation | [QuantGPT Cloud](https://quant-gpt.com) — independent IC/IR verification |
 | Frontend | React 18 + TypeScript + Tailwind CSS 4 (monitoring dashboard) |
 | MCP | FastMCP (stdio / SSE / streamable-http) |
 | Report | QuantStats HTML |
@@ -320,7 +311,6 @@ results = batch_evaluate(
 | Statistical Tests | `anti_overfit.py` | IC 稳定性 + 子样本压力测试（牛/熊/震荡）+ 安慰剂检验 + 半衰期估计 |
 | Walk-Forward | `rolling_validator.py` | 滚动 train/valid/test 窗口，评估样本外 IC 衰减 |
 | WQ Simulation | `wq_simulate.py` | Dollar-neutral 多空模拟，Sharpe/Turnover/Fitness 计算 |
-| **QuantGPT Cloud** | `cloud_client.py` | **独立验证 — A 级因子自动上传 [quant-gpt.com](https://quant-gpt.com) + IC/IR 检验 + 样本外跟踪** |
 | WQ BRAIN API (optional) | `wq_brain_client.py` | 直连 BRAIN 平台 — 真实模拟 + 一键正式提交 |
 
 ### 3. Evolutionary Factor Iteration
@@ -370,7 +360,6 @@ TrajectoryAnalyzer → MetaEvolutionSelector → Strategy Execution
 | Anti-bias | Researcher judgment | None | None | **Dual-LLM mandatory cross-review** |
 | Knowledge accumulation | Personal notes | None | Lost between sessions | **Structured KB across sessions** |
 | Anti-overfit | -- | -- | -- | **4 statistical tests + walk-forward** |
-| Independent validation | -- | -- | -- | **[QuantGPT Cloud](https://quant-gpt.com) — 独立 IC/IR 验证 + 样本外跟踪** |
 | WQ BRAIN (optional) | -- | -- | -- | Operator-aligned + direct submission |
 | MCP / AI Agent | -- | -- | -- | **15 tools, skill-loop orchestration** |
 | Live trading | Yes | Limited | -- | -- |
@@ -401,7 +390,7 @@ Add MCP configuration to Claude Code or Claude Desktop:
 }
 ```
 
-Then let the Agent work: *"在沪深300上挖掘高质量因子，自动上传 Cloud 验证"*
+Then let the Agent work: *"在沪深300上挖掘高质量因子"*
 
 ### Option 2: Expression Mode (No LLM Required)
 
@@ -467,19 +456,6 @@ alembic upgrade head
 </details>
 
 <details>
-<summary><b>Optional: QuantGPT Cloud (independent validation)</b></summary>
-
-```bash
-# Edit .env — A-grade factors auto-upload for independent validation
-QUANTGPT_CLOUD_EMAIL=your_email@example.com
-QUANTGPT_CLOUD_PASSWORD=your_password
-```
-
-Register at [quant-gpt.com](https://quant-gpt.com), then add credentials to `.env`. A-grade factors will be automatically uploaded and independently validated (IC/IR/turnover/correlation checks).
-
-</details>
-
-<details>
 <summary><b>Expression Examples</b></summary>
 
 **Local backtest** — works out of the box with baostock/akshare data:
@@ -534,7 +510,6 @@ quantgpt/
 │   ├── rolling_validator.py     # Walk-forward validation
 │   ├── wq_simulate.py           # Dollar-neutral simulator
 │   ├── wq_brain_client.py       # WQ BRAIN API (optional)
-│   ├── cloud_client.py          # QuantGPT Cloud upload + independent validation
 │   ├── neutralize.py            # Industry & cap neutralization
 │   ├── daily_summary.py         # LLM-powered daily market report
 │   └── routes/                  # API route modules

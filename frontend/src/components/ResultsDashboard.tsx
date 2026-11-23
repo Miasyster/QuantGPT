@@ -1,6 +1,6 @@
 import type { BacktestResult } from "../types/backtest";
-import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { Cloud, Star } from "lucide-react";
+import type { ReactNode } from "react";
+import { Star } from "lucide-react";
 import MetricCard from "./MetricCard";
 import GroupReturnsTable from "./GroupReturnsTable";
 import ReportViewer from "./ReportViewer";
@@ -8,11 +8,8 @@ import StockFactorPanel from "./StockFactorPanel";
 import FactorInterpretationCard from "./FactorInterpretationCard";
 import ShareCardButton from "./ShareCardButton";
 import WQBrainCard from "./WQBrainCard";
-import CloudValidationCard from "./CloudValidationCard";
 import RobustnessCard from "./RobustnessCard";
 import { useColorMode } from "../contexts/ColorModeContext";
-import { checkCloudStatus, uploadToCloud, type CloudValidationResult } from "../api/cloud";
-import { authFetch, BASE, parseError } from "../api/client";
 
 interface Props {
   result: BacktestResult;
@@ -30,53 +27,9 @@ function num(n: number): string {
   return n.toFixed(4);
 }
 
-const CLOUD_UNIVERSES = new Set(["hs300", "csi500", "csi1000"]);
-
 export default function ResultsDashboard({ result, iterationSlot, onSaveFactor, isSaving, isSaved }: Props) {
   const { isDark } = useColorMode();
   const { metrics, backtest_summary, report_url, params } = result;
-
-  const [cloudConfigured, setCloudConfigured] = useState<boolean | null>(null);
-  const [cloudUrl, setCloudUrl] = useState("");
-  const [cloudResult, setCloudResult] = useState<CloudValidationResult | null>(result.cloud_validation ?? null);
-  const [cloudUploading, setCloudUploading] = useState(false);
-  const [cloudError, setCloudError] = useState<string | null>(null);
-
-  useEffect(() => {
-    checkCloudStatus().then((s) => { setCloudConfigured(s.configured); setCloudUrl(s.cloud_url); });
-  }, []);
-
-  useEffect(() => {
-    if (result.cloud_validation) setCloudResult(result.cloud_validation);
-  }, [result.cloud_validation]);
-
-  const handleCloudUpload = useCallback(async () => {
-    setCloudUploading(true);
-    setCloudError(null);
-    try {
-      const fvRes = await authFetch(`${BASE}/api/v1/factor_values`, {
-        method: "POST",
-        body: JSON.stringify({ expression: params.expression, universe: params.universe, start_date: params.start_date, end_date: params.end_date }),
-      });
-      if (!fvRes.ok) throw new Error(await parseError(fvRes));
-      const fvData = await fvRes.json();
-
-      const res = await uploadToCloud({
-        expression: params.expression,
-        universe: params.universe,
-        claimed_ic_mean: backtest_summary.ic_mean,
-        claimed_ic_ir: backtest_summary.ic_ir,
-        factor_values_data: fvData.data,
-      });
-      setCloudResult(res);
-    } catch (e) {
-      setCloudError(e instanceof Error ? e.message : "上传失败");
-    } finally {
-      setCloudUploading(false);
-    }
-  }, [params, backtest_summary]);
-
-  const showCloudButton = cloudConfigured && CLOUD_UNIVERSES.has(params.universe) && !cloudResult;
 
   return (
     <div className="space-y-4">
@@ -84,18 +37,6 @@ export default function ResultsDashboard({ result, iterationSlot, onSaveFactor, 
         <h3 className={`text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>回测结果</h3>
         <div className="flex items-center gap-3">
           <ShareCardButton result={result} />
-          {showCloudButton && (
-            <button
-              onClick={handleCloudUpload}
-              disabled={cloudUploading}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
-                isDark ? "text-blue-400 bg-blue-500/10 hover:bg-blue-500/20" : "text-blue-700 bg-blue-50 hover:bg-blue-100"
-              }`}
-            >
-              <Cloud className="h-3.5 w-3.5" />
-              {cloudUploading ? "上传中..." : "上传到 Cloud"}
-            </button>
-          )}
           {onSaveFactor && (
             <button
               onClick={onSaveFactor}
@@ -163,15 +104,6 @@ export default function ResultsDashboard({ result, iterationSlot, onSaveFactor, 
 
       {result.wq_brain && Object.keys(result.wq_brain.wq_is_tests ?? {}).length > 0 && (
         <WQBrainCard wqBrain={result.wq_brain} />
-      )}
-
-      {cloudResult && (
-        <CloudValidationCard result={cloudResult} cloudUrl={cloudUrl} />
-      )}
-      {cloudError && (
-        <div className={`text-xs px-3 py-2 rounded-lg ${isDark ? "bg-red-500/10 text-red-400" : "bg-red-50 text-red-600"}`}>
-          Cloud 上传失败：{cloudError}
-        </div>
       )}
 
       {iterationSlot}

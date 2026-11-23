@@ -2,7 +2,7 @@
 
 > Last updated: 2026-05-20
 
-QuantGPT 的方向：从个人研究工具走向开放因子研究生态。本地引擎负责挖掘和验证，[QuantGPT Cloud](https://quant-gpt.com) 负责独立验证和样本外跟踪，社区负责算子扩展和知识积累。
+QuantGPT 的方向：从个人研究工具走向开放因子研究生态。本地引擎负责挖掘和验证，社区负责算子扩展和知识积累。
 
 ---
 
@@ -12,19 +12,9 @@ QuantGPT 的方向：从个人研究工具走向开放因子研究生态。本�
 - [x] 多维评分体系（IC/IR/稳定性/反过拟合/分组回测）
 - [x] 4 项反过拟合检验 + Walk-forward 验证
 - [x] 8 方向进化突变 + 交叉引擎
-- [x] QuantGPT Cloud 集成（A 级因子自动上传 + 独立 IC/IR 验证）
 - [x] WQ BRAIN 集成（可选，模拟 + 提交）
 - [x] MCP 15 工具 + REST API + Web UI
 - [x] 双 LLM 交叉评审（DeepSeek Reasoner）
-
----
-
-## In Progress
-
-### QuantGPT Cloud 深度集成
-
-- [ ] 样本外跟踪仪表板 — 前端展示 Cloud 端实时 OOS IC 曲线
-- [ ] 因子衰减预警 — 定期拉取 Cloud OOS 数据，IC 跌破阈值时自动通知
 
 ---
 
@@ -45,15 +35,15 @@ QuantGPT 的方向：从个人研究工具走向开放因子研究生态。本�
 
 **目标**：避免知识固化——因子会衰减，规则会过时。
 
-- [ ] **Cloud OOS 半衰期监控** — 每个上传至 Cloud 的因子自动跟踪样本外 IC，低于 50% 峰值时标记"衰减中"
+- [ ] **OOS 半衰期监控** — 对因子库中的因子定期滚动计算样本外 IC，低于 50% 峰值时标记"衰减中"
 - [ ] **知识库规则过期** — `rules/` 中每条规则标注来源因子和验证日期，OOS 失效时自动降级为 `findings/`
-- [ ] **因子库自动清理** — 本地因子库中长期未通过 Cloud OOS 检验的因子标记为 archived
+- [ ] **因子库自动清理** — 本地因子库中长期未通过 OOS 检验的因子标记为 archived
 
 ### 3. 评价体系解耦，脱离 BRAIN 依赖
 
 **目标**：让回测和进化引擎服务于通用量化框架，不绑定 WQ BRAIN。
 
-当前状态：评分函数 `compute_factor_score()` 中 WQ Alignment 占 25% 权重，进化引擎的 fitness 用 WQ 的 `ls_sharpe * sqrt(|ls_annual| / turnover)` 公式。
+当前状态：评分函数 `compute_factor_score()` 为 5 维等权（不含外部平台对齐项），但进化引擎的 fitness 用 WQ 的 `ls_sharpe * sqrt(|ls_annual| / turnover)` 公式。
 
 - [ ] **目标适配器抽象** — 将评分标准抽象为可配置接口：
   ```python
@@ -61,8 +51,7 @@ QuantGPT 的方向：从个人研究工具走向开放因子研究生态。本�
       def compute_fitness(self, backtest_result: dict) -> float: ...
       def compute_score(self, backtest_result: dict) -> dict: ...
   ```
-  内置两个实现：`CloudTarget`（以 Cloud IC/IR 为标准）、`WQTarget`（现有 WQ 逻辑）
-- [ ] **Cloud 作为默认评分目标** — 新用户无需配置 WQ，Cloud 验证成为默认的外部验证层
+  内置两个实现：`ICTarget`（以本地 IC/IR 为标准）、`WQTarget`（现有 WQ 逻辑）
 - [ ] **自定义适配器文档** — 让社区可以对接 Zipline、Backtrader、vnpy 等框架
 
 ### 4. 算子贡献指南
@@ -82,20 +71,8 @@ QuantGPT 的方向：从个人研究工具走向开放因子研究生态。本�
 **目标**：社区参与知识积累，从"个人作品"走向"协作生态"。
 
 - [ ] **公开回测数据片段** — 在 repo 中发布标准化历史数据子集（如 CSI500 2023-2024），社区可本地复现
-- [ ] **大赛评分标准** — 基于 Cloud 独立验证结果排名（IC IR + 反过拟合分 + 去重）
+- [ ] **大赛评分标准** — 基于本地验证结果排名（IC IR + 反过拟合分 + 去重）
 - [ ] **优秀因子合并知识库** — 获奖因子的设计思路和验证数据进入 `research_notes/knowledge/`
-- [ ] **排行榜页面** — Cloud 端展示社区因子排名，鼓励公开研究
-
----
-
-## Architecture Decision Records
-
-| # | Decision | Date | Status |
-|---|----------|------|--------|
-| ADR-001 | Cloud 作为主验证通道，WQ BRAIN 降为可选 | 2026-05-20 | Accepted |
-| ADR-002 | 认证方式：邮箱密码 + JWT 自动刷新（非 API Key） | 2026-05-20 | Accepted |
-| ADR-003 | 因子值批量上传 30 天/批（绕过 nginx 413） | 2026-05-20 | Accepted |
-| ADR-004 | Symbol 格式自动转换 baostock→Cloud（`sh.600519`→`600519.SH`） | 2026-05-20 | Accepted |
 
 ---
 

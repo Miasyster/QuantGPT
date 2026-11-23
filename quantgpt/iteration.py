@@ -36,13 +36,11 @@ def compute_factor_score(
     backtest_summary: dict,
     report_metrics: dict,
     anti_overfit_score: float | None = None,
-    data_days: int | None = None,
 ) -> dict:
     """Compute a composite 0-100 score for a factor backtest result.
 
-    6-component scoring with Cloud alignment as primary external target:
-      IC Mean 15%, IC IR 15%, Stability 15%, Anti-Overfit 15%,
-      Group BT 15%, Cloud Alignment 25%.
+    5-component equal-weight scoring:
+      IC Mean 20%, IC IR 20%, Stability 20%, Anti-Overfit 20%, Group BT 20%.
     """
     def _clamp(v, lo, hi):
         return max(lo, min(hi, v))
@@ -68,28 +66,8 @@ def compute_factor_score(
     top_positive_sub = 100.0 if spread > 0 else 0.0
     group_bt_score = ls_sharpe_gb * 0.4 + mono_sub * 0.4 + top_positive_sub * 0.2
 
-    # Cloud Alignment: IC Mean (30%) + IC IR (30%) + Turnover (20%) + Data Sufficiency (20%)
-    cloud_ic_mean = abs(ic_mean)
-    cloud_ic_ir = abs(ic_ir)
-    cloud_turnover = backtest_summary.get("turnover", 0.0)
-    cloud_data_days = data_days if data_days is not None else 120
-
-    cloud_ic_mean_sub = min(cloud_ic_mean / 0.03, 1.0) * 100
-    cloud_ic_ir_sub = min(cloud_ic_ir / 0.3, 1.0) * 100
-
-    if 0.01 <= cloud_turnover <= 0.35:
-        cloud_turnover_sub = 100.0
-    elif cloud_turnover > 0.35:
-        cloud_turnover_sub = max(0.0, 100.0 - (cloud_turnover - 0.35) / 0.35 * 100)
-    else:
-        cloud_turnover_sub = 0.0
-
-    cloud_data_sub = min(cloud_data_days / 120, 1.0) * 100
-    cloud_alignment_score = (cloud_ic_mean_sub * 0.30 + cloud_ic_ir_sub * 0.30
-                             + cloud_turnover_sub * 0.20 + cloud_data_sub * 0.20)
-
-    score = (ic_mean_score * 0.15 + ic_ir_score * 0.15 + stability_score * 0.15
-             + ao_score * 0.15 + group_bt_score * 0.15 + cloud_alignment_score * 0.25)
+    score = (ic_mean_score * 0.20 + ic_ir_score * 0.20 + stability_score * 0.20
+             + ao_score * 0.20 + group_bt_score * 0.20)
     score = round(_clamp(score, 0, 100), 1)
 
     grade = "A" if score >= 80 else "B" if score >= 60 else "C" if score >= 40 else "D"
@@ -105,22 +83,13 @@ def compute_factor_score(
             capped = True
             cap_reason = "negative_cagr" if cagr < 0 else "negative_sharpe"
 
-    cloud_predicted_pass = (
-        cloud_ic_mean >= 0.015
-        and cloud_ic_ir >= 0.15
-        and cloud_turnover <= 0.35
-        and cloud_data_days >= 120
-    )
-
     return {
         "score": score, "grade": grade,
         "component_scores": {
             "ic_mean": round(ic_mean_score, 1), "ic_ir": round(ic_ir_score, 1),
             "stability": round(stability_score, 1), "anti_overfit": round(ao_score, 1),
             "group_backtest": round(group_bt_score, 1),
-            "cloud_alignment": round(cloud_alignment_score, 1),
         },
-        "cloud_predicted_pass": cloud_predicted_pass,
         "capped": capped, "cap_reason": cap_reason,
     }
 
@@ -281,20 +250,6 @@ def _evaluate_candidate(
     }
     scoring = compute_factor_score(backtest_summary, report_result["metrics"], ao_val)
 
-    cloud_validation = None
-    if scoring["grade"] == "A" and factor_df is not None:
-        try:
-            from .cloud_client import auto_upload_to_cloud
-            cloud_validation = auto_upload_to_cloud(
-                expression=expression,
-                universe=params.get("universe", "hs300"),
-                factor_df=factor_df,
-                claimed_ic_mean=result.get("ic_mean"),
-                claimed_ic_ir=result.get("ic_ir"),
-            )
-        except Exception as e:
-            logger.warning(f"Cloud auto-upload failed for iteration candidate: {e}")
-
     return {
         "expression": expression,
         "status": "success",
@@ -304,7 +259,6 @@ def _evaluate_candidate(
         "backtest_summary": backtest_summary,
         "wq_brain": result.get("wq_brain", {}),
         "anti_overfit": anti_overfit_result,
-        "cloud_validation": cloud_validation,
         "report_metrics": report_result["metrics"],
         "report_url": f"/api/v1/reports/{report_filename}",
         "report_filename": report_filename,

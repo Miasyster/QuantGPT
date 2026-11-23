@@ -126,7 +126,7 @@ def _run_iteration_task(task_id: str, parent_task_id: str, user_id: str, n_candi
 
         parent_backtest_summary = parent_result.get("backtest_summary", {})
         parent_report_metrics = parent_result.get("metrics", {})
-        parent_scoring = compute_factor_score(parent_backtest_summary, parent_report_metrics, data_days=None)
+        parent_scoring = compute_factor_score(parent_backtest_summary, parent_report_metrics)
 
         parent_metrics = {
             "backtest_summary": parent_backtest_summary,

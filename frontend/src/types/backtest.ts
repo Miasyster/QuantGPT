@@ -66,7 +66,6 @@ export interface IterationCandidate {
   };
   report_metrics: BacktestMetrics;
   report_url: string;
-  cloud_validation?: import("../api/cloud").CloudValidationResult | null;
   status: "success" | "failed";
   error?: string;
 }
@@ -146,7 +145,6 @@ export interface ScoringResult {
   score: number;
   grade: "A" | "B" | "C" | "D";
   component_scores: Record<string, number>;
-  cloud_predicted_pass?: boolean;
   capped?: boolean;
   cap_reason?: string;
 }
@@ -187,7 +185,6 @@ export interface BacktestResult {
     generated_expression: string;
   };
   interpretation?: FactorInterpretation;
-  cloud_validation?: import("../api/cloud").CloudValidationResult | null;
   stock_factor_data?: StockFactorData | null;
   nav_series?: { date: string; value: number }[];
 }

@@ -43,7 +43,6 @@ const COMPONENT_LABELS: Record<string, string> = {
   stability: "稳定性",
   anti_overfit: "反过拟合",
   group_backtest: "分组回测",
-  cloud_alignment: "Cloud 对齐",
 };
 
 function TestRow({ name, passed, details, isDark }: { name: string; passed: boolean; details: Record<string, unknown>; isDark: boolean }) {
@@ -160,7 +159,7 @@ export default function RobustnessCard({ antiOverfit, adversarial, scoring }: Pr
       </div>
 
       {scoring?.component_scores && (
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
           {Object.entries(scoring.component_scores).map(([k, v]) => (
             <div key={k} className={`text-center px-2 py-1.5 rounded-lg ${isDark ? "bg-gray-800" : "bg-gray-50"}`}>
               <div className={`text-[10px] ${isDark ? "text-gray-500" : "text-gray-400"}`}>{COMPONENT_LABELS[k] ?? k}</div>
@@ -177,15 +176,6 @@ export default function RobustnessCard({ antiOverfit, adversarial, scoring }: Pr
       {totalTests > 0 && (
         <div className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"} flex items-center gap-1`}>
           <span>稳健性检验：{passedTests}/{totalTests} 通过</span>
-          {scoring?.cloud_predicted_pass != null && (
-            <span className={`ml-2 px-1.5 py-0.5 rounded ${
-              scoring.cloud_predicted_pass
-                ? isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-600"
-                : isDark ? "bg-gray-700 text-gray-400" : "bg-gray-100 text-gray-500"
-            }`}>
-              Cloud 预测：{scoring.cloud_predicted_pass ? "可能通过" : "可能不通过"}
-            </span>
-          )}
         </div>
       )}
 
